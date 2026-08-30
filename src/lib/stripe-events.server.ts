@@ -113,7 +113,24 @@ export async function applyStripeEvent(event: StripeEvent): Promise<string> {
     return "pro tier activated";
   }
 
+  // Cadeaubonnen: pas activeren (en factuur + bon mailen) bij bevestigde betaling.
+  if (meta["kind"] === "gift_card" && meta["gift_card_id"]) {
+    const succeeded =
+      event.type === "payment_intent.succeeded" ||
+      event.type === "checkout.session.async_payment_succeeded" ||
+      (event.type === "checkout.session.completed" &&
+        (stringOf(object, "payment_status") ?? "paid") === "paid");
+    if (!succeeded) return "gift card awaiting payment";
+    const { markGiftCardPaid } = await import("./gift-cards.server");
+    const outcome = await markGiftCardPaid({
+      giftId: meta["gift_card_id"],
+      reference: stringOf(object, "id") ?? event.id ?? null,
+    });
+    return `gift card ${outcome}`;
+  }
+
   // SecureShield-opwaarderingen: alleen bijschrijven bij een geslaagde betaling.
+
   if (meta["kind"] === "wallet_topup" && meta["user_id"]) {
     const succeeded =
       event.type === "payment_intent.succeeded" ||
