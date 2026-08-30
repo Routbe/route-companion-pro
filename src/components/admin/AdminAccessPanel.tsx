@@ -3,6 +3,14 @@ import { ChevronDown, Loader2, MapPin, Search, ShieldCheck, Smartphone, UserCog 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import { findUsers } from "@/lib/admin.functions";
 import {
@@ -53,6 +61,9 @@ export function AdminAccessPanel() {
   const [blockUntil, setBlockUntil] = useState("");
   const [busy, setBusy] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [verifyFirst, setVerifyFirst] = useState("");
+  const [verifyLast, setVerifyLast] = useState("");
 
   const refreshGrants = useCallback(async () => {
     try {
@@ -83,6 +94,8 @@ export function AdminAccessPanel() {
     try {
       const data = await getUserInsightForAdmin({ data: { userId } });
       setInsight(data);
+      setVerifyFirst(data?.legalFirstName ?? "");
+      setVerifyLast(data?.legalLastName ?? "");
       setFirstName(data?.legalFirstName ?? "");
       setLastName(data?.legalLastName ?? "");
       setHandle(data?.username ?? "");
@@ -125,12 +138,21 @@ export function AdminAccessPanel() {
     if (!insight) return;
     setBusy(true);
     try {
-      const result = await setUserVerifiedStatus({ data: { userId: insight.userId, verified } });
+      const result = await setUserVerifiedStatus({
+        data: {
+          userId: insight.userId,
+          verified,
+          // Namen zijn optioneel: leeg laten mag, dan blijft de naam ongewijzigd.
+          ...(verified && verifyFirst.trim() ? { firstName: verifyFirst.trim() } : {}),
+          ...(verified && verifyLast.trim() ? { lastName: verifyLast.trim() } : {}),
+        },
+      });
       if (!result.ok) {
         notifyError(result.error);
         return;
       }
       notifySuccess(verified ? "Blauw vinkje toegekend." : "Verificatie ingetrokken.");
+      setVerifyOpen(false);
       await openUser(insight.userId);
     } catch (error) {
       notifyError(error instanceof Error ? error.message : "Verifiëren mislukt");
@@ -334,11 +356,54 @@ export function AdminAccessPanel() {
               variant={insight.verified ? "outline" : "default"}
               className="ml-auto h-9"
               disabled={busy}
-              onClick={() => void toggleVerified(!insight.verified)}
+              onClick={() =>
+                insight.verified ? void toggleVerified(false) : setVerifyOpen(true)
+              }
             >
-              {insight.verified ? "Verificatie intrekken" : "Verifiëren"}
+              {insight.verified ? "Verificatie intrekken" : "Markeer als verified"}
             </Button>
           </div>
+
+          <Dialog open={verifyOpen} onOpenChange={setVerifyOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Markeer als verified</DialogTitle>
+                <DialogDescription>
+                  Vul de wettelijke voor- en achternaam in als je die hebt — dit is niet
+                  verplicht. De naam bepaalt welke gebruikersnamen dit geverifieerde account mag
+                  claimen (voornaam + achternaam, één deel mag een initiaal zijn).
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <Label htmlFor="verify-first" className="text-xs">Voornaam</Label>
+                  <Input
+                    id="verify-first"
+                    value={verifyFirst}
+                    onChange={(e) => setVerifyFirst(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="verify-last" className="text-xs">Achternaam</Label>
+                  <Input
+                    id="verify-last"
+                    value={verifyLast}
+                    onChange={(e) => setVerifyLast(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setVerifyOpen(false)}>
+                  Annuleren
+                </Button>
+                <Button type="button" disabled={busy} onClick={() => void toggleVerified(true)}>
+                  Blauw vinkje toekennen
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1 text-sm">

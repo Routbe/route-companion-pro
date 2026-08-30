@@ -14,7 +14,7 @@ import { normalizeHandleForStorage } from "@/lib/handle-rules";
 import { useHandleAvailability } from "@/hooks/useHandleAvailability";
 import { styledProfilePath } from "@/lib/profile-url";
 import { useUrlStyle } from "@/hooks/useUrlStyle";
-import { verifiedHandleSuggestions } from "@/lib/legal-name";
+import { verifiedHandleSuggestionList as verifiedHandleSuggestions } from "@/lib/verified-handle";
 
 import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
