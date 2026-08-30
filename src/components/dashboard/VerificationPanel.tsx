@@ -19,11 +19,8 @@ import { DONATION_PLANS, euro, type DonationPlan } from "@/lib/profile";
 import { clampContribution, contributionErrorKey, minContributionCents } from "@/lib/contributions";
 import { useI18n } from "@/lib/i18n";
 import { formatDateTime } from "@/lib/format";
-import {
-  IDENTITY_MISMATCH_MESSAGE,
-  handleMatchesLegalName,
-  legalNameError,
-} from "@/lib/legal-name";
+import { legalNameError } from "@/lib/legal-name";
+import { VERIFIED_STRUCTURE_MESSAGE, verifiedHandleError } from "@/lib/verified-handle";
 import {
   confirmCardPaymentIntent,
   resumeCardPaymentIntent,
@@ -1402,9 +1399,9 @@ export function VerificationPanel() {
                   {handle &&
                     legalName.trim() !== "" &&
                     !legalNameError(legalName) &&
-                    !handleMatchesLegalName(handle, legalName) && (
+                    Boolean(verifiedHandleError(handle, legalName)) && (
                       <p className="text-[11px] text-amber-600 dark:text-amber-400">
-                        {IDENTITY_MISMATCH_MESSAGE} Your handle{" "}
+                        {VERIFIED_STRUCTURE_MESSAGE} Your handle{" "}
                         <span className="font-mono">@{handle}</span> does not match — you may be
                         asked to change it after verification.
                       </p>

@@ -236,7 +236,11 @@ export function ProfileMenu() {
             <User className="h-4 w-4 shrink-0" aria-hidden />
             <div className="flex flex-col">
               <span>Profile Studio</span>
-              <span className="text-[11px] text-muted-foreground">rout.be{profilePath}</span>
+              {/* Bij dual identity staan beide publieke links hierboven al: de
+                  hub-URL herhalen maakt de keuze alleen verwarrend. */}
+              {!verified && (
+                <span className="text-[11px] text-muted-foreground">rout.be{profilePath}</span>
+              )}
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => nav("/dashboard")} className="gap-2">

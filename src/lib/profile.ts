@@ -4,7 +4,7 @@
  */
 import { handleRuleMessage, type HandleRuleContext } from "./handle-rules";
 import type { PublicSocialLink } from "./social-verify";
-import { IDENTITY_MISMATCH_MESSAGE, handleMatchesLegalName } from "./legal-name";
+import { verifiedHandleError } from "./verified-handle";
 
 
 
@@ -918,16 +918,12 @@ export function handleIssue(h: string, ctx: HandleRuleContext = {}): string | nu
   if (isReservedHandle(h)) return "That handle is reserved by the system.";
   if (!isValidHandle(h))
     return "Use lowercase letters, numbers and the separators . - _ ; start and end with a letter or number.";
-  // Verified identity: the handle must stay traceable to the legal name.
-  // Privacy-modus: geverifieerde leden mogen een schone alias kiezen die niets
-  // over hun wettelijke naam prijsgeeft.
-  if (
-    ctx.tier === "verified" &&
-    ctx.identityMode !== "private" &&
-    ctx.legalName &&
-    !handleMatchesLegalName(h, ctx.legalName)
-  ) {
-    return IDENTITY_MISMATCH_MESSAGE;
+  // Geverifieerde identiteit: de handle IS de naamstructuur (voornaam +
+  // achternaam, één deel mag een initiaal zijn). Ook de privacy-modus ontsnapt
+  // hier niet aan — het blauwe vinkje hangt aan die naam.
+  if (ctx.tier === "verified") {
+    const structural = verifiedHandleError(h, ctx.legalName ?? null);
+    if (structural) return structural;
   }
   return null;
 }

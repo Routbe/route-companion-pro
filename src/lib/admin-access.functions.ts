@@ -102,7 +102,14 @@ export const blockUserFeature = createServerFn({ method: "POST" })
 export const setUserVerifiedStatus = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((data: unknown) =>
-    z.object({ userId: z.string().uuid(), verified: z.boolean() }).parse(data),
+    z
+      .object({
+        userId: z.string().uuid(),
+        verified: z.boolean(),
+        firstName: z.string().trim().max(80).optional(),
+        lastName: z.string().trim().max(80).optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ data, context }) => {
     const { assertAdminPermission, setUserVerified } = await import("./admin-access.server");

@@ -98,6 +98,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { AvatarFramePicker } from "@/components/studio/AvatarFramePicker";
+import { VERIFIED_STRUCTURE_MESSAGE, verifiedHandleSuggestionList } from "@/lib/verified-handle";
 import { FavoritesEditor } from "@/components/dashboard/FavoritesEditor";
 import { MAX_FAVORITES } from "@/lib/favorites";
 import { FaviconUploader } from "@/components/studio/FaviconUploader";
@@ -338,8 +339,9 @@ export function ProfileEditor() {
   const reserved = isReservedHandle(normalized);
   const handleCtx = {
     tier: (verified ? "verified" : "free") as "verified" | "free",
-    // Privacy-modus: geen koppeling met de wettelijke naam, geen cijferplicht.
-    legalName: prefs.identityMode === "private" ? null : legalName,
+    // Geverifieerde handles volgen altijd de naamstructuur — ook in privacy-modus,
+    // want het blauwe vinkje hangt aan die wettelijke naam.
+    legalName,
     identityMode: prefs.identityMode,
   };
   const handleProblem = normalized ? handleIssue(normalized, handleCtx) : null;
@@ -465,6 +467,8 @@ export function ProfileEditor() {
       if (result.reason === "handle_reserved")
         return toast.error("That handle is reserved by the system.");
       if (result.reason === "handle_invalid") return toast.error("That handle is not valid.");
+      if (result.reason === "handle_identity_mismatch")
+        return toast.error(VERIFIED_STRUCTURE_MESSAGE);
       return toast.error(result.reason ?? "Saving failed");
     }
     setClaimed(normalized);
@@ -1495,6 +1499,22 @@ export function ProfileEditor() {
                       </span>
                     )}
                   </p>
+                )}
+                {verified && !handleOk && verifiedHandleSuggestionList(legalName).length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {verifiedHandleSuggestionList(legalName)
+                      .slice(0, 8)
+                      .map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          className="rounded-full border border-border px-2 py-1 font-mono text-xs hover:bg-muted"
+                          onClick={() => setHandle(suggestion)}
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                  </div>
                 )}
               </section>
 

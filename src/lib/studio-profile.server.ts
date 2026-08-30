@@ -107,6 +107,21 @@ export async function writeStudioProfile(userId: string, input: StudioProfileInp
   `) as Row[];
   if (taken.length) throw new Error("handle_taken");
 
+  // Geverifieerde accounts blijven aan hun wettelijke naam gekoppeld: de handle
+  // moet de voornaam/achternaam-structuur volgen (server is de echte poortwachter).
+  const identityRows = (await sql`
+    select coalesce(verified, false) as verified,
+           coalesce(nullif(trim(verified_legal_name), ''),
+                    nullif(trim(concat_ws(' ', legal_first_name, legal_last_name)), '')) as legal_name
+      from public.profiles where id = ${userId} limit 1
+  `) as Row[];
+  const identity = identityRows[0];
+  if (identity && identity["verified"] === true) {
+    const { verifiedHandleError } = await import("./verified-handle");
+    const issue = verifiedHandleError(username, (identity["legal_name"] as string | null) ?? null);
+    if (issue) throw new Error("handle_identity_mismatch");
+  }
+
   const rows = (await sql`
     insert into public.profiles (
       id, username, display_name, tagline, avatar_url, favicon_url, theme, card_style, blocks, updated_at

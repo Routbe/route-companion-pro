@@ -4,7 +4,8 @@
  */
 import { sql } from "@/lib/neon";
 import { writeAudit } from "./admin.server";
-import { normalizeLegalName, verifiedHandleSuggestions } from "./legal-name";
+import { normalizeLegalName } from "./legal-name";
+import { verifiedHandleError, verifiedHandleSuggestionList } from "./verified-handle";
 
 type Row = Record<string, unknown>;
 
@@ -170,7 +171,7 @@ export async function setUserLegalName(opts: {
       updated_at = now()
   `;
 
-  const suggestions = verifiedHandleSuggestions(legalName);
+  const suggestions = verifiedHandleSuggestionList(legalName);
   const handle = opts.applyHandle?.trim().replace(/^@/, "").toLowerCase() ?? "";
   let appliedHandle: string | null = null;
   if (handle) {
@@ -178,6 +179,14 @@ export async function setUserLegalName(opts: {
       select id from public.profiles where username = ${handle} and id <> ${opts.userId} limit 1
     `) as Row[];
     if (taken.length) return { ok: false as const, error: "Die gebruikersnaam is al bezet.", suggestions };
+    // Geverifieerde accounts dragen de naamstructuur; vrije aliassen niet.
+    const verifiedRows = (await sql`
+      select coalesce(verified, false) as verified from public.profiles where id = ${opts.userId} limit 1
+    `) as Row[];
+    if (verifiedRows[0]?.["verified"] === true) {
+      const issue = verifiedHandleError(handle, legalName);
+      if (issue) return { ok: false as const, error: issue, suggestions };
+    }
     await sql`update public.profiles set username = ${handle}, updated_at = now() where id = ${opts.userId}`;
     appliedHandle = handle;
   }
@@ -361,7 +370,22 @@ export async function setUserVerified(opts: {
   adminId: string;
   userId: string;
   verified: boolean;
+  /** Optioneel: de admin kan de wettelijke naam meteen mee invullen. */
+  firstName?: string;
+  lastName?: string;
 }) {
+  const first = (opts.firstName ?? "").trim();
+  const last = (opts.lastName ?? "").trim();
+  if (first || last) {
+    await sql`
+      update public.profiles
+         set legal_first_name = coalesce(nullif(${first}, ''), legal_first_name),
+             legal_last_name = coalesce(nullif(${last}, ''), legal_last_name),
+             updated_at = now()
+       where id = ${opts.userId}
+    `;
+  }
+
   const rows = (await sql`
     select verified_legal_name, legal_first_name, legal_last_name, username
       from public.profiles where id = ${opts.userId} limit 1
@@ -373,12 +397,8 @@ export async function setUserVerified(opts: {
     ((row["verified_legal_name"] as string | null) ?? "").trim() ||
     `${(row["legal_first_name"] as string | null) ?? ""} ${(row["legal_last_name"] as string | null) ?? ""}`.trim();
 
-  if (opts.verified && legalName.split(" ").filter(Boolean).length < 2) {
-    return {
-      ok: false as const,
-      error: "Vul eerst de wettelijke voor- en achternaam in — die hoort bij het blauwe vinkje.",
-    };
-  }
+  // De naam is optioneel: verifiëren mag ook zonder, dan blijft het blauwe
+  // vinkje zonder naam achter de popover staan tot de naam bekend is.
 
   await sql`
     update public.profiles
