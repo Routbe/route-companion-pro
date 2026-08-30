@@ -52,6 +52,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as AuthGitlabRouteImport } from './routes/auth_.gitlab'
 import { Route as AuthVerifyRouteImport } from './routes/auth_.verify'
 import { Route as DevEmailsRouteImport } from './routes/dev.emails'
+import { Route as GiftCodeRouteImport } from './routes/gift_.$code'
 import { Route as RUsernameRouteImport } from './routes/r.$username'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as StatsTokenRouteImport } from './routes/stats.$token'
@@ -303,6 +304,11 @@ const DevEmailsRoute = DevEmailsRouteImport.update({
   path: '/dev/emails',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GiftCodeRoute = GiftCodeRouteImport.update({
+  id: '/gift_/$code',
+  path: '/gift/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RUsernameRoute = RUsernameRouteImport.update({
   id: '/r/$username',
   path: '/r/$username',
@@ -539,6 +545,7 @@ export interface FileRoutesByFullPath {
   '/auth/gitlab': typeof AuthGitlabRouteWithChildren
   '/auth/verify': typeof AuthVerifyRoute
   '/dev/emails': typeof DevEmailsRoute
+  '/gift/$code': typeof GiftCodeRoute
   '/r/$username': typeof RUsernameRoute
   '/s/$slug': typeof SSlugRoute
   '/stats/$token': typeof StatsTokenRoute
@@ -619,6 +626,7 @@ export interface FileRoutesByTo {
   '/auth/gitlab': typeof AuthGitlabRouteWithChildren
   '/auth/verify': typeof AuthVerifyRoute
   '/dev/emails': typeof DevEmailsRoute
+  '/gift/$code': typeof GiftCodeRoute
   '/r/$username': typeof RUsernameRoute
   '/s/$slug': typeof SSlugRoute
   '/stats/$token': typeof StatsTokenRoute
@@ -701,6 +709,7 @@ export interface FileRoutesById {
   '/auth_/gitlab': typeof AuthGitlabRouteWithChildren
   '/auth_/verify': typeof AuthVerifyRoute
   '/dev/emails': typeof DevEmailsRoute
+  '/gift_/$code': typeof GiftCodeRoute
   '/r/$username': typeof RUsernameRoute
   '/s/$slug': typeof SSlugRoute
   '/stats/$token': typeof StatsTokenRoute
@@ -783,6 +792,7 @@ export interface FileRouteTypes {
     | '/auth/gitlab'
     | '/auth/verify'
     | '/dev/emails'
+    | '/gift/$code'
     | '/r/$username'
     | '/s/$slug'
     | '/stats/$token'
@@ -863,6 +873,7 @@ export interface FileRouteTypes {
     | '/auth/gitlab'
     | '/auth/verify'
     | '/dev/emails'
+    | '/gift/$code'
     | '/r/$username'
     | '/s/$slug'
     | '/stats/$token'
@@ -944,6 +955,7 @@ export interface FileRouteTypes {
     | '/auth_/gitlab'
     | '/auth_/verify'
     | '/dev/emails'
+    | '/gift_/$code'
     | '/r/$username'
     | '/s/$slug'
     | '/stats/$token'
@@ -1017,6 +1029,7 @@ export interface RootRouteChildren {
   AuthGitlabRoute: typeof AuthGitlabRouteWithChildren
   AuthVerifyRoute: typeof AuthVerifyRoute
   DevEmailsRoute: typeof DevEmailsRoute
+  GiftCodeRoute: typeof GiftCodeRoute
   RUsernameRoute: typeof RUsernameRoute
   SSlugRoute: typeof SSlugRoute
   StatsTokenRoute: typeof StatsTokenRoute
@@ -1341,6 +1354,13 @@ declare module '@tanstack/react-router' {
       path: '/dev/emails'
       fullPath: '/dev/emails'
       preLoaderRoute: typeof DevEmailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gift_/$code': {
+      id: '/gift_/$code'
+      path: '/gift/$code'
+      fullPath: '/gift/$code'
+      preLoaderRoute: typeof GiftCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$username': {
@@ -1771,6 +1791,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthGitlabRoute: AuthGitlabRouteWithChildren,
   AuthVerifyRoute: AuthVerifyRoute,
   DevEmailsRoute: DevEmailsRoute,
+  GiftCodeRoute: GiftCodeRoute,
   RUsernameRoute: RUsernameRoute,
   SSlugRoute: SSlugRoute,
   StatsTokenRoute: StatsTokenRoute,
