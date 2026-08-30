@@ -116,7 +116,7 @@ export async function writeStudioProfile(userId: string, input: StudioProfileInp
       from public.profiles where id = ${userId} limit 1
   `) as Row[];
   const identity = identityRows[0];
-  if (identity && identity["verified"] === true) {
+  if (identity && identity["verified"] === true && identity["legal_name"]) {
     const { verifiedHandleError } = await import("./verified-handle");
     const issue = verifiedHandleError(username, (identity["legal_name"] as string | null) ?? null);
     if (issue) throw new Error("handle_identity_mismatch");

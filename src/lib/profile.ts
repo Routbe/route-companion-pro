@@ -921,8 +921,8 @@ export function handleIssue(h: string, ctx: HandleRuleContext = {}): string | nu
   // Geverifieerde identiteit: de handle IS de naamstructuur (voornaam +
   // achternaam, één deel mag een initiaal zijn). Ook de privacy-modus ontsnapt
   // hier niet aan — het blauwe vinkje hangt aan die naam.
-  if (ctx.tier === "verified") {
-    const structural = verifiedHandleError(h, ctx.legalName ?? null);
+  if (ctx.tier === "verified" && ctx.legalName) {
+    const structural = verifiedHandleError(h, ctx.legalName);
     if (structural) return structural;
   }
   return null;
