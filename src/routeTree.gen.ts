@@ -20,6 +20,7 @@ import { Route as CardRouteImport } from './routes/card'
 import { Route as ClaimRouteImport } from './routes/claim'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as EmailTemplatesRouteImport } from './routes/email-templates'
+import { Route as GiftRouteImport } from './routes/gift'
 import { Route as GoRouteImport } from './routes/go'
 import { Route as HubRouteImport } from './routes/hub'
 import { Route as IbanQrRouteImport } from './routes/iban-qr'
@@ -51,6 +52,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as AuthGitlabRouteImport } from './routes/auth_.gitlab'
 import { Route as AuthVerifyRouteImport } from './routes/auth_.verify'
 import { Route as DevEmailsRouteImport } from './routes/dev.emails'
+import { Route as GiftCodeRouteImport } from './routes/gift_.$code'
 import { Route as RUsernameRouteImport } from './routes/r.$username'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as StatsTokenRouteImport } from './routes/stats.$token'
@@ -140,6 +142,11 @@ const ContactRoute = ContactRouteImport.update({
 const EmailTemplatesRoute = EmailTemplatesRouteImport.update({
   id: '/email-templates',
   path: '/email-templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GiftRoute = GiftRouteImport.update({
+  id: '/gift',
+  path: '/gift',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GoRoute = GoRouteImport.update({
@@ -295,6 +302,11 @@ const AuthVerifyRoute = AuthVerifyRouteImport.update({
 const DevEmailsRoute = DevEmailsRouteImport.update({
   id: '/dev/emails',
   path: '/dev/emails',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GiftCodeRoute = GiftCodeRouteImport.update({
+  id: '/gift_/$code',
+  path: '/gift/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RUsernameRoute = RUsernameRouteImport.update({
@@ -501,6 +513,7 @@ export interface FileRoutesByFullPath {
   '/claim': typeof ClaimRoute
   '/contact': typeof ContactRoute
   '/email-templates': typeof EmailTemplatesRoute
+  '/gift': typeof GiftRoute
   '/go': typeof GoRoute
   '/hub': typeof HubRoute
   '/iban-qr': typeof IbanQrRoute
@@ -532,6 +545,7 @@ export interface FileRoutesByFullPath {
   '/auth/gitlab': typeof AuthGitlabRouteWithChildren
   '/auth/verify': typeof AuthVerifyRoute
   '/dev/emails': typeof DevEmailsRoute
+  '/gift/$code': typeof GiftCodeRoute
   '/r/$username': typeof RUsernameRoute
   '/s/$slug': typeof SSlugRoute
   '/stats/$token': typeof StatsTokenRoute
@@ -580,6 +594,7 @@ export interface FileRoutesByTo {
   '/claim': typeof ClaimRoute
   '/contact': typeof ContactRoute
   '/email-templates': typeof EmailTemplatesRoute
+  '/gift': typeof GiftRoute
   '/go': typeof GoRoute
   '/hub': typeof HubRoute
   '/iban-qr': typeof IbanQrRoute
@@ -611,6 +626,7 @@ export interface FileRoutesByTo {
   '/auth/gitlab': typeof AuthGitlabRouteWithChildren
   '/auth/verify': typeof AuthVerifyRoute
   '/dev/emails': typeof DevEmailsRoute
+  '/gift/$code': typeof GiftCodeRoute
   '/r/$username': typeof RUsernameRoute
   '/s/$slug': typeof SSlugRoute
   '/stats/$token': typeof StatsTokenRoute
@@ -661,6 +677,7 @@ export interface FileRoutesById {
   '/claim': typeof ClaimRoute
   '/contact': typeof ContactRoute
   '/email-templates': typeof EmailTemplatesRoute
+  '/gift': typeof GiftRoute
   '/go': typeof GoRoute
   '/hub': typeof HubRoute
   '/iban-qr': typeof IbanQrRoute
@@ -692,6 +709,7 @@ export interface FileRoutesById {
   '/auth_/gitlab': typeof AuthGitlabRouteWithChildren
   '/auth_/verify': typeof AuthVerifyRoute
   '/dev/emails': typeof DevEmailsRoute
+  '/gift_/$code': typeof GiftCodeRoute
   '/r/$username': typeof RUsernameRoute
   '/s/$slug': typeof SSlugRoute
   '/stats/$token': typeof StatsTokenRoute
@@ -742,6 +760,7 @@ export interface FileRouteTypes {
     | '/claim'
     | '/contact'
     | '/email-templates'
+    | '/gift'
     | '/go'
     | '/hub'
     | '/iban-qr'
@@ -773,6 +792,7 @@ export interface FileRouteTypes {
     | '/auth/gitlab'
     | '/auth/verify'
     | '/dev/emails'
+    | '/gift/$code'
     | '/r/$username'
     | '/s/$slug'
     | '/stats/$token'
@@ -821,6 +841,7 @@ export interface FileRouteTypes {
     | '/claim'
     | '/contact'
     | '/email-templates'
+    | '/gift'
     | '/go'
     | '/hub'
     | '/iban-qr'
@@ -852,6 +873,7 @@ export interface FileRouteTypes {
     | '/auth/gitlab'
     | '/auth/verify'
     | '/dev/emails'
+    | '/gift/$code'
     | '/r/$username'
     | '/s/$slug'
     | '/stats/$token'
@@ -901,6 +923,7 @@ export interface FileRouteTypes {
     | '/claim'
     | '/contact'
     | '/email-templates'
+    | '/gift'
     | '/go'
     | '/hub'
     | '/iban-qr'
@@ -932,6 +955,7 @@ export interface FileRouteTypes {
     | '/auth_/gitlab'
     | '/auth_/verify'
     | '/dev/emails'
+    | '/gift_/$code'
     | '/r/$username'
     | '/s/$slug'
     | '/stats/$token'
@@ -982,6 +1006,7 @@ export interface RootRouteChildren {
   ClaimRoute: typeof ClaimRoute
   ContactRoute: typeof ContactRoute
   EmailTemplatesRoute: typeof EmailTemplatesRoute
+  GiftRoute: typeof GiftRoute
   GoRoute: typeof GoRoute
   HubRoute: typeof HubRoute
   IbanQrRoute: typeof IbanQrRoute
@@ -1004,6 +1029,7 @@ export interface RootRouteChildren {
   AuthGitlabRoute: typeof AuthGitlabRouteWithChildren
   AuthVerifyRoute: typeof AuthVerifyRoute
   DevEmailsRoute: typeof DevEmailsRoute
+  GiftCodeRoute: typeof GiftCodeRoute
   RUsernameRoute: typeof RUsernameRoute
   SSlugRoute: typeof SSlugRoute
   StatsTokenRoute: typeof StatsTokenRoute
@@ -1104,6 +1130,13 @@ declare module '@tanstack/react-router' {
       path: '/email-templates'
       fullPath: '/email-templates'
       preLoaderRoute: typeof EmailTemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gift': {
+      id: '/gift'
+      path: '/gift'
+      fullPath: '/gift'
+      preLoaderRoute: typeof GiftRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/go': {
@@ -1321,6 +1354,13 @@ declare module '@tanstack/react-router' {
       path: '/dev/emails'
       fullPath: '/dev/emails'
       preLoaderRoute: typeof DevEmailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gift_/$code': {
+      id: '/gift_/$code'
+      path: '/gift/$code'
+      fullPath: '/gift/$code'
+      preLoaderRoute: typeof GiftCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$username': {
@@ -1728,6 +1768,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClaimRoute: ClaimRoute,
   ContactRoute: ContactRoute,
   EmailTemplatesRoute: EmailTemplatesRoute,
+  GiftRoute: GiftRoute,
   GoRoute: GoRoute,
   HubRoute: HubRoute,
   IbanQrRoute: IbanQrRoute,
@@ -1750,6 +1791,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthGitlabRoute: AuthGitlabRouteWithChildren,
   AuthVerifyRoute: AuthVerifyRoute,
   DevEmailsRoute: DevEmailsRoute,
+  GiftCodeRoute: GiftCodeRoute,
   RUsernameRoute: RUsernameRoute,
   SSlugRoute: SSlugRoute,
   StatsTokenRoute: StatsTokenRoute,
